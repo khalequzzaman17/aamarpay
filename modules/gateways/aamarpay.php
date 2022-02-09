@@ -1,111 +1,147 @@
-<?php //004fb
-if(!extension_loaded('ionCube Loader')){$__oc=strtolower(substr(php_uname(),0,3));$__ln='ioncube_loader_'.$__oc.'_'.substr(phpversion(),0,3).(($__oc=='win')?'.dll':'.so');if(function_exists('dl')){@dl($__ln);}if(function_exists('_il_exec')){return _il_exec();}$__ln='/ioncube/'.$__ln;$__oid=$__id=realpath(ini_get('extension_dir'));$__here=dirname(__FILE__);if(strlen($__id)>1&&$__id[1]==':'){$__id=str_replace('\\','/',substr($__id,2));$__here=str_replace('\\','/',substr($__here,2));}$__rd=str_repeat('/..',substr_count($__id,'/')).$__here.'/';$__i=strlen($__rd);while($__i--){if($__rd[$__i]=='/'){$__lp=substr($__rd,0,$__i).$__ln;if(file_exists($__oid.$__lp)){$__ln=$__lp;break;}}}if(function_exists('dl')){@dl($__ln);}}else{die('The file '.__FILE__." is corrupted.\n");}if(function_exists('_il_exec')){return _il_exec();}echo("Site error: the ".(php_sapi_name()=='cli'?'ionCube':'<a href="http://www.ioncube.com">ionCube</a>')." PHP Loader needs to be installed. This is a widely used PHP extension for running ionCube protected PHP code, website security and malware blocking.\n\nPlease visit ".(php_sapi_name()=='cli'?'get-loader.ioncube.com':'<a href="http://get-loader.ioncube.com">get-loader.ioncube.com</a>')." for install assistance.\n\n");exit(199);
+<?php
+function aamarpay_config()
+{
+    $configarray = array(
+        "FriendlyName" => array(
+            "Type" => "System",
+            "Value" => "aamarPay"
+        ),
+        "username" => array(
+            "FriendlyName" => "Merchant ID",
+            "Type" => "text",
+            "Size" => "20"
+        ),
+        "transmethod" => array(
+            "FriendlyName" => "Signature Key",
+            "Type" => "text",
+            "Size" => "30"
+        ),
+        "additional_per_fee" => array(
+            "FriendlyName" => "Additional Service Charge %",
+            "Type" => "text",
+            "Size" => "30",
+            "Description" => "<br>If You Want to add Additional Service Charge Then Enter The Ratio in Integer Format. Like for 3% input value will be 3 and For No Additional Charge input Value 0"
+        ),
+        "additional_fixed_fee" => array(
+            "FriendlyName" => "Additional Service Charge",
+            "Type" => "text",
+            "Size" => "30",
+            "Description" => "<br>If You Want to add Additional Service Charge Then Enter The Fixed Amount in Integer Format. Like for 20. and For No Additional Charge input Value 0"
+        ),
+        "testmode" => array(
+            "FriendlyName" => "Test Mode",
+            "Type" => "yesno",
+            "Description" => "Tick this to Run on test MODE"
+        )
+    );
+    return $configarray;
+}
+function aamarpay_link($params)
+{
+    $gatewayusername      = $params['username'];
+    $gatewaytransmethod   = $params['transmethod'];
+    $invoiceid            = $params['invoiceid'];
+    $description          = $params["description"];
+    $amount               = $params['amount'];
+    $currency             = $params['currency'];
+    $additional_per_fee   = $params['additional_per_fee'];
+    $additional_fixed_fee = $params['additional_fixed_fee'];
+    $additonal_service    = ($amount * $additional_per_fee) / 100;
+    $total_amount         = $amount + $additonal_service;
+    $firstname            = $params['clientdetails']['firstname'];
+    $lastname             = $params['clientdetails']['lastname'];
+    $email                = $params['clientdetails']['email'];
+    $address1             = $params['clientdetails']['address1'];
+    $address2             = $params['clientdetails']['address2'];
+    $city                 = $params['clientdetails']['city'];
+    $state                = $params['clientdetails']['state'];
+    $postcode             = $params['clientdetails']['postcode'];
+    $country              = $params['clientdetails']['country'];
+    $phone                = $params['clientdetails']['phonenumber'];
+    $companyname          = $params['companyname'];
+    $systemurl            = $params['systemurl'];
+    $currency             = $params['currency'];
+    $basecurrencyamount   = $params['basecurrencyamount'];
+    $basecurrency         = $params['basecurrency'];
+    $cus_name             = $firstname . ' ' . $lastname;
+    $success_url          = $params['systemurl'] . 'modules/gateways/callback/aamarpay.php';
+    $failed_url           = $params['systemurl'] . 'modules/gateways/callback/aamarpay.php';
+    $cancel_url           = $params['systemurl'] . '/viewinvoice.php?id=' . $invoiceid;
+    $url                  = "https://secure.aamarpay.com/request.php";
+    $fields               = array(
+        'store_id' => $gatewayusername,
+        'amount' => $total_amount,
+        'currency' => $currency,
+        'tran_id' => $invoiceid,
+        'cus_name' => $cus_name,
+        'cus_email' => $email,
+        'cus_add1' => $address1,
+        'cus_add2' => $address2,
+        'cus_city' => $city,
+        'cus_state' => $state,
+        'cus_postcode' => $postcode,
+        'cus_country' => $country,
+        'cus_phone' => $phone,
+        'ship_name' => $companyname,
+        'ship_add1' => $systemurl,
+        'desc' => $description,
+        'success_url' => $success_url,
+        'fail_url' => $failed_url,
+        'cancel_url' => $cancel_url,
+        'opt_a' => $amount,
+        'opt_b' => $currency,
+        'opt_c' => '',
+        'opt_d' => '',
+        'signature_key' => $gatewaytransmethod
+    );
+    $domain               = $_SERVER["SERVER_NAME"];
+    $ip                   = $_SERVER["SERVER_ADDR"];
+    foreach ($fields as $key => $value) {
+        $fields_string .= $key . '=' . $value . '&';
+    }
+    rtrim($fields_string, '&');
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        "REMOTE_ADDR: $ip",
+        "HTTP_X_FORWARDED_FOR: $ip"
+    ));
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_REFERER, $domain);
+    curl_setopt($ch, CURLOPT_INTERFACE, $ip);
+    curl_setopt($ch, CURLOPT_POST, count($fields));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $result     = curl_exec($ch);
+    $url_decode = json_decode($result);
+    $webaddr    = "https://secure.aamarpay.com";
+    curl_close($ch);
+    $code .= '<form action="' . $webaddr . '' . $url_decode . '" method="post">';
+    $code .= '<input type="hidden" name="store_id" value="' . $gatewayusername . '">';
+    $code .= '<input type="hidden" name="tran_id" value="' . $invoiceid . '">';
+    $code .= '<input type="hidden" name="amount" value="' . $total_amount . '" >';
+    $code .= '<input type="hidden" name="success_url"  value="' . $params['systemurl'] . '/modules/gateways/callback/aamarpay.php" />';
+    $code .= '<input type="hidden" name="fail_url" value="' . $params['systemurl'] . '/modules/gateways/callback/aamarpay.php" />';
+    $code .= '<input type="hidden" name="cancel_url" value="' . $params['systemurl'] . '/clientarea.php?action=invoices" />';
+    $code .= '<input type="hidden" name="currency" value="' . $currency . '" >';
+    $code .= '<input type="hidden" name="cus_name" value="' . $firstname . ' ' . $lastname . '">';
+    $code .= '<input type="hidden" name="cus_add1" value="' . $address1 . '" >';
+    $code .= '<input type="hidden" name="cus_add2" value="' . $address2 . '" >';
+    $code .= '<input type="hidden" name="cus_city" value="' . $city . '" >';
+    $code .= '<input type="hidden" name="cus_state" value="' . $state . '">';
+    $code .= '<input type="hidden" name="cus_postcode" value="' . $postcode . '">';
+    $code .= '<input type="hidden" name="cus_country" value="' . $country . '">';
+    $code .= '<input type="hidden" name="cus_phone" value="' . $phone . '" >';
+    $code .= '<input type="hidden" name="cus_email" value="' . $email . '" >';
+    $code .= '<input type="hidden" name="ship_name" value="' . $companyname . '" >';
+    $code .= '<input type="hidden" name="ship_add1" value="' . $systemurl . '" >';
+    $code .= '<input type="hidden" name="signature_key" value="' . $gatewaytransmethod . '">';
+    $code .= '<input type="hidden" name="opt_a" value="' . $amount . '">';
+    $code .= '<input type="hidden" name="opt_b" value="' . $currency . '">';
+    $code .= '<input type="hidden" name="desc" value="' . $description . '">';
+    $code .= '<input type="submit" class="btn btn-success" value="Pay Now" />
+</form>';
+    return $code;
+}
 ?>
-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
