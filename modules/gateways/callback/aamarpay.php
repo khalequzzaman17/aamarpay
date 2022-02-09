@@ -1,51 +1,38 @@
-<?php //004fb
-if(!extension_loaded('ionCube Loader')){$__oc=strtolower(substr(php_uname(),0,3));$__ln='ioncube_loader_'.$__oc.'_'.substr(phpversion(),0,3).(($__oc=='win')?'.dll':'.so');if(function_exists('dl')){@dl($__ln);}if(function_exists('_il_exec')){return _il_exec();}$__ln='/ioncube/'.$__ln;$__oid=$__id=realpath(ini_get('extension_dir'));$__here=dirname(__FILE__);if(strlen($__id)>1&&$__id[1]==':'){$__id=str_replace('\\','/',substr($__id,2));$__here=str_replace('\\','/',substr($__here,2));}$__rd=str_repeat('/..',substr_count($__id,'/')).$__here.'/';$__i=strlen($__rd);while($__i--){if($__rd[$__i]=='/'){$__lp=substr($__rd,0,$__i).$__ln;if(file_exists($__oid.$__lp)){$__ln=$__lp;break;}}}if(function_exists('dl')){@dl($__ln);}}else{die('The file '.__FILE__." is corrupted.\n");}if(function_exists('_il_exec')){return _il_exec();}echo("Site error: the ".(php_sapi_name()=='cli'?'ionCube':'<a href="http://www.ioncube.com">ionCube</a>')." PHP Loader needs to be installed. This is a widely used PHP extension for running ionCube protected PHP code, website security and malware blocking.\n\nPlease visit ".(php_sapi_name()=='cli'?'get-loader.ioncube.com':'<a href="http://get-loader.ioncube.com">get-loader.ioncube.com</a>')." for install assistance.\n\n");exit(199);
+<?php
+include("../../../init.php");
+include("../../../includes/functions.php");
+include("../../../includes/gatewayfunctions.php");
+include("../../../includes/invoicefunctions.php");
+$gatewaymodule = "aamarpay";
+$GATEWAY       = getGatewayVariables($gatewaymodule);
+if (!$GATEWAY["type"])
+    die("Module Not Activated");
+$status     = $_REQUEST["pay_status"];
+$invoiceid  = $_REQUEST["mer_txnid"];
+$transid    = $_REQUEST["pg_txnid"];
+$amount     = $_REQUEST["amount"];
+$amount_rec = $_REQUEST["store_amount"];
+$fee        = $_REQUEST["pg_service_charge_bdt"];
+$reason     = $_REQUEST["reason"];
+if ($_REQUEST["opt_b"] == 'USD') {
+    $amount = $_REQUEST["opt_a"];
+} else {
+    $amount = $_REQUEST["amount"];
+}
+$invoiceid = checkCbInvoiceID($invoiceid, $GATEWAY["name"]);
+checkCbTransID($transid);
+if ($status == "Successful") {
+    print "<center>Please Wait.....Processing....</center>";
+    $description = "\n\t<br/>Status : <b style='color:#5d994f;'>" . $status . " </b>\n\t<br>Invoice ID: " . $mer_txnid . "\n\t<br>Bank Transaction ID : " . $bank_txn . "\n\t<br>Card Type : " . $card_type . "\n\t<br>Card Number : " . $card_number . "\n\t<br>Currency: " . $currency_merchant . "\n\t<br>Transaction Time :  " . $pay_time . "  \n\t";
+    addInvoicePayment($invoiceid, $transid, $amount, $fee, $gatewaymodule);
+    logTransaction($GATEWAY["name"], $_POST, "Successful");
+?><html><head></head><body onload="document.send_process.submit()"><form action="/clientarea.php?action=invoices"method="POST"name="send_process"></form></body></html><?php
+    exit;
+} else {
+    print "<center>Please Wait.....Processing....</center>";
+    $description = "\n\t<br/>Status : <b style='color:#FF0000;'>" . $status . " </b>\n\t<br>Failed Reason : " . $reason . "\n\t<br>Invoice ID: " . $mer_txnid . "\n\t<br>Bank Transaction ID : " . $bank_txn . "\n\t<br>Card Type : " . $card_type . "\n\t<br>Card Number : " . $card_number . "\n\t<br>Currency: " . $currency_merchant . "\n\t<br>Transaction Time :  " . $pay_time . "  \n\t";
+    logTransaction($GATEWAY["name"], $_POST, "Unsuccessful");
+?><html><head></head><body onload="document.send_process.submit()"><form action="/clientarea.php?action=invoices"method="POST"name="send_process"></form></body></html><?php
+    exit;
+}
 ?>
-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
-LzYvn8wSgpcnXbiC4Vk1vfXZlNggJwfokwhQMxG=
